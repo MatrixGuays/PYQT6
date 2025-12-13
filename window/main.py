@@ -1,7 +1,7 @@
 import sys
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QStatusBar, QFileDialog, QTextEdit, QVBoxLayout, QWidget, QFontDialog)
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QStatusBar, QFileDialog, QTextEdit, QVBoxLayout, QWidget, QFontDialog, QColorDialog, )
 from PyQt6.QtCore import QStandardPaths
-from PyQt6.QtGui import QAction, QKeySequence 
+from PyQt6.QtGui import QAction, QKeySequence, QTextCharFormat 
 
 class MainWindow (QMainWindow):
     
@@ -54,6 +54,11 @@ class MainWindow (QMainWindow):
         self.font_action.setStatusTip ("Cambiar Fuente")
         self.font_action.triggered.connect (self.set_font)
         
+        self.color_action = QAction ("Color", self)
+        self.color_action.setShortcut (QKeySequence("ctrl+K"))
+        self.color_action.setStatusTip ("Cambiar Color")
+        self.color_action.triggered.connect (self.set_color)
+        
         self.undo_action = QAction ("Deshacer", self)
         self.undo_action.setShortcut (QKeySequence("ctrl+Z"))
         self.undo_action.setStatusTip ("Deshacer cambios")
@@ -72,6 +77,7 @@ class MainWindow (QMainWindow):
         
         menu_editar = self.menuBar().addMenu ("Editar")
         menu_editar.addAction (self.font_action)
+        menu_editar.addAction (self.color_action)
         menu_editar.addAction (self.undo_action)
         menu_editar.addAction (self.redo_action)
     
@@ -85,6 +91,18 @@ class MainWindow (QMainWindow):
         with open(self.file, "r" ) as file:
             self.setWindowTitle(f"Ventana Activa - {self.file}")
             self.editor_text.setText (file.read())
+    
+    def set_color (self):
+        print("Cambiando color...")
+        selected_text_cursor = self.editor_text.textCursor()
+        color = QColorDialog.getColor(self.editor_text.textColor(), self)
+        if color.isValid():
+            if selected_text_cursor.hasSelection():
+                format = QTextCharFormat()
+                format.setForeground (color)
+                selected_text_cursor.mergeCharFormat (format)
+            else:
+                self.editor_text.setTextColor (color)
     
     def set_font (self):
         print("Cambiando fuente...")
