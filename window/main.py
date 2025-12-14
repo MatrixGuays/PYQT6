@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QStatusBar, QFileDialog, QTextEdit, QVBoxLayout, QWidget, QFontDialog, QColorDialog, )
 from PyQt6.QtCore import QStandardPaths
-from PyQt6.QtGui import QAction, QKeySequence, QTextCharFormat 
+from PyQt6.QtGui import QAction, QKeySequence, QTextCharFormat, QGuiApplication, QPixmap
 
 class MainWindow (QMainWindow):
     
@@ -20,10 +20,11 @@ class MainWindow (QMainWindow):
         self.show()
     
     def generate_window (self):
+        self.create_content()
         self.create_action()
         self.create_menu()
-        self.create_content()
-    
+        
+        
     def create_content(self):
         layout = QVBoxLayout()
         self.editor_text = QTextEdit()
@@ -62,12 +63,12 @@ class MainWindow (QMainWindow):
         self.undo_action = QAction ("Deshacer", self)
         self.undo_action.setShortcut (QKeySequence("ctrl+Z"))
         self.undo_action.setStatusTip ("Deshacer cambios")
-        self.undo_action.triggered.connect (self.set_font)
+        self.undo_action.triggered.connect (self.editor_text.undo)
         
         self.redo_action = QAction ("Rehacer", self)
         self.redo_action.setShortcut (QKeySequence("ctrl+Y"))
         self.redo_action.setStatusTip ("Rehacer cambios")
-        self.redo_action.triggered.connect (self.redo)   
+        self.redo_action.triggered.connect (self.editor_text.redo)   
     
     def create_menu(self):
         menu_archivo = self.menuBar().addMenu ("Archivo")
@@ -123,9 +124,30 @@ class MainWindow (QMainWindow):
     
     def save (self):
         print("Guardando archivo...")
+        options = (QFileDialog.Option.DontUseNativeDialog)
+        initial_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
+        file_name, _ = QFileDialog.getSaveFileName(self, "Guardar Archivo", initial_dir, "Archivos de texto (*.txt);;HTML files (*.html);;All files (*)")
+        
+        if file_name.endswith(".txt"):
+            text = self.editor_text.toPlainText()
+            with open (file_name, "w") as f:
+                f.write (text)
+        elif file_name.endswith (".html"):
+            text_html = self.editor_text.toHtml()
+            with open (file_name, "w") as f:
+                f.write (text_html)
     
     def export (self):
         print("Exportando archivo...")
+        
+        initial_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DocumentsLocation)
+        screen = QGuiApplication.primaryScreen()
+        pixmap = screen.grabWindow(self.editor_text.winId())
+        file_name, _ = QFileDialog.getSaveFileName (self, "Exportar Archivo", initial_dir, ";;All files (*);;PNG files (*.png);;JPG files (*.jpg)")
+        
+        if file_name:
+            pixmap.save (file_name)
+        
     
     def undo (self):
         print("Deshaciendo Cambios...")
