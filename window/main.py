@@ -110,7 +110,7 @@ class MainWindow (QMainWindow):
         options = (QFileDialog.Option.DontUseNativeDialog)
         initial_dir = QStandardPaths.writableLocation (QStandardPaths.StandardLocation.DocumentsLocation)
         file_types = "Text files (*.txt);;Imagenes (*.png);;all files (*)"
-        self.file, _ =  QFileDialog.getOpenFileName(self, "Open File", initial_dir, file_types)
+        self.file, _ =  QFileDialog.getOpenFileName(self, "Open File", initial_dir, file_types, options = options)
         
         with open(self.file, "r" ) as file:
             self.setWindowTitle(f"Ventana Activa - {self.file}")
