@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QStatusBar, QFileDialog, QTextEdit, QVBoxLayout, QWidget, QFontDialog, QColorDialog, )
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QStatusBar, QFileDialog, QTextEdit, QVBoxLayout, QWidget, QFontDialog, QColorDialog, QToolBar)
 from PyQt6.QtCore import QStandardPaths
 from PyQt6.QtGui import QAction, QKeySequence, QTextCharFormat, QGuiApplication, QPixmap
 
@@ -23,8 +23,12 @@ class MainWindow (QMainWindow):
         self.create_content()
         self.create_action()
         self.create_menu()
-        
-        
+        self.create_toolbar()
+    
+    def create_toolbar(self):
+        self.toolbar = QToolBar("Barra de herramientas")
+        self.addToolBar(self.toolbar)
+    
     def create_content(self):
         layout = QVBoxLayout()
         self.editor_text = QTextEdit()
@@ -68,7 +72,19 @@ class MainWindow (QMainWindow):
         self.redo_action = QAction ("Rehacer", self)
         self.redo_action.setShortcut (QKeySequence("ctrl+Y"))
         self.redo_action.setStatusTip ("Rehacer cambios")
-        self.redo_action.triggered.connect (self.editor_text.redo)   
+        self.redo_action.triggered.connect (self.editor_text.redo)
+        
+        self.view_open_action = QAction ("Abrir", self, checkable = True)
+        self.view_open_action.setStatusTip ("Agregar boton en la barra de tareas para abrir archivos")
+        self.view_open_action.triggered.connect (self.view_open)
+        
+        self.view_save_action = QAction ("Guardar", self, checkable = True)
+        self.view_save_action.setStatusTip ("Agregar boton en la barra de tareas para guardar archivos")
+        self.view_save_action.triggered.connect (self.view_save)
+        
+        self.view_export_action = QAction ("Exportar", self, checkable = True)
+        self.view_export_action.setStatusTip ("Agregar boton en la barra de tareas para exportar archivos")
+        self.view_export_action.triggered.connect (self.view_export)
     
     def create_menu(self):
         menu_archivo = self.menuBar().addMenu ("Archivo")
@@ -81,13 +97,20 @@ class MainWindow (QMainWindow):
         menu_editar.addAction (self.color_action)
         menu_editar.addAction (self.undo_action)
         menu_editar.addAction (self.redo_action)
+        
+        menu_ver = self.menuBar().addMenu ("view")
+        
+        submenu_personal = menu_ver.addMenu ("Personalizar")
+        submenu_personal.addAction(self.view_open_action)
+        submenu_personal.addAction(self.view_save_action)
+        submenu_personal.addAction(self.view_export_action)
     
     def open (self):
         print("Abriendo archivo...")
         options = (QFileDialog.Option.DontUseNativeDialog)
         initial_dir = QStandardPaths.writableLocation (QStandardPaths.StandardLocation.DocumentsLocation)
         file_types = "Text files (*.txt);;Imagenes (*.png);;all files (*)"
-        self.file , _ =  QFileDialog.getOpenFileName(self, "Open File", initial_dir, file_types, options=options)
+        self.file, _ =  QFileDialog.getOpenFileName(self, "Open File", initial_dir, file_types)
         
         with open(self.file, "r" ) as file:
             self.setWindowTitle(f"Ventana Activa - {self.file}")
@@ -147,7 +170,25 @@ class MainWindow (QMainWindow):
         
         if file_name:
             pixmap.save (file_name)
+            
+    def view_open(self):
         
+        if self.view_open_action.isChecked():
+            self.toolbar.addAction(self.open_action)
+        else: 
+            self.toolbar.removeAction(self.open_action)
+    
+    def view_save(self):
+        if self.view_save_action.isChecked():
+            self.toolbar.addAction(self.save_action)
+        else:
+            self.toolbar.removeAction(self.save_action)
+    
+    def view_export(self):
+        if self.view_export_action.isChecked():
+            self.toolbar.addAction(self.export_action)
+        else:
+            self.toolbar.removeAction(self.export_action)
     
     def undo (self):
         print("Deshaciendo Cambios...")
