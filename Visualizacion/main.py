@@ -1,8 +1,9 @@
 import sys 
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton, QDockWidget, QStatusBar, QTabWidget, QWidget, QHBoxLayout, QVBoxLayout, QListWidget)
+import os
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton, QDockWidget, QStatusBar, QTabWidget, QWidget, QHBoxLayout, QVBoxLayout, QListWidget, QFileDialog, QListWidgetItem)
 
-from PyQt6.QtGui import QPixmap, QAction, QKeySequence
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QAction, QKeySequence, QIcon
+from PyQt6.QtCore import Qt, QStandardPaths
 
 class MainWindow (QMainWindow):
     def __init__(self):
@@ -76,10 +77,18 @@ class MainWindow (QMainWindow):
         self.listar_musica_action.setStatusTip("Aqui pudes listar los feriantes")
         self.listar_musica_action.triggered.connect(self.list_music)
         self.listar_musica_action.setChecked(True)
+        
+        self.open_folder_music_action = QAction("Abrir carpeta", self)
+        self.open_folder_music_action.setShortcut(QKeySequence("ctrl+o"))
+        self.open_folder_music_action.setStatusTip("Abre la carpeta")
+        self.open_folder_music_action.triggered.connect(self.open_folder_music)
     
     #MENU
     def create_menu(self):
         self.menuBar()
+        menu_file = self.menuBar().addMenu("File")
+        menu_file.addAction(self.open_folder_music_action)
+        
         menu_view = self.menuBar().addMenu("view")
         menu_view.addAction(self.listar_musica_action)
     
@@ -99,7 +108,19 @@ class MainWindow (QMainWindow):
     
     def generate_settings_tab(self):
         pass
-
+    
+    def open_folder_music(self):
+        initial_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.MusicLocation)
+        selected_folder = QFileDialog.getExistingDirectory(None, "selecciona una carpeta", initial_dir)
+        icon = QIcon("images/image.png")
+        
+        for archivo in os.listdir(selected_folder):
+            ruta_archivo = os.path.join (selected_folder, archivo)
+            if ruta_archivo.endwith(".txt"):
+                item = QListWidgetItem(archivo)
+                item.setIcon(icon)
+                self.songs_list.addItem(item)
+                
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
