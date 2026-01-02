@@ -7,6 +7,7 @@ from PyQt6.QtCore import Qt, QStandardPaths, QSize
 
 class MainWindow (QMainWindow):
     
+    
     def __init__(self):
         super().__init__()
         self.initialize_ui()
